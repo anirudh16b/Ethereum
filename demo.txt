@@ -1,0 +1,54 @@
+//demo.sol
+pragma solidity ^0.4.0;
+
+contract Employee {
+
+    //HR to add Employee Details
+    struct EmpDetails {
+        string empName;
+        string emailID;
+    }
+
+    //Employee to add their own ID
+    struct Emp_govID {
+        uint emp_gov_ID;
+        string empName;
+        bool doesExist;
+    }
+    //Event to add employee
+    event AddedEmployee(uint employeeID);
+    
+    //counters to keep count. Ideally both should be same
+    uint numEmpDetails;
+    uint numEmp_govID;
+    
+    //mappings to generate structures
+    mapping(uint => EmpDetails) Employees;
+    mapping(uint => Emp_govID) govID;
+    
+    //function to add employees
+    function addEmployee(string name, string emailID) public {
+        //empID is the return variable
+        uint employeeID = numEmpDetails++;
+        //Create a new Employee Struct with name and empID and saves it to storage
+        Employees[employeeID] = EmpDetails(name,emailID);
+        //Trigger the event
+        emit AddedEmployee(employeeID);
+    }
+    
+    //function to add Emp Gov ID 
+    function add_govID(string  empName, uint employeeID) public {
+        if(govID[employeeID].doesExist == true) {
+            uint empGov_ID = numEmp_govID++; //empGOV_ID is the return variable
+            govID[empGov_ID] = Emp_govID(employeeID, empName, true);
+        }
+    }
+    
+    /********* GET using view ***********/
+    
+    // returns employee information
+    function getEmployee(uint employeeID) public view returns (uint, string) {
+        return (govID[employeeID].emp_gov_ID, govID[employeeID].empName);
+    }
+    
+}
