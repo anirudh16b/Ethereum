@@ -1,7 +1,7 @@
 pragma solidity ^0.4.0;
 //pragma experimental ABIEncoderV2; // for the getter function using multiple arrays
 
-contract debug3 {
+contract debug2 {
     
     uint numEmpDetails=1;
     
@@ -42,7 +42,7 @@ contract debug3 {
         
         empl.empName = name;
         empl.emailID = emailID;
-        
+        empl.allowEmployees = address(this);
         
         EmpDetails.push(Employees[employeeID]) -1;
         //Employees[numEmpDetails+1].empName.push(name);
