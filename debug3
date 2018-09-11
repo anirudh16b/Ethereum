@@ -1,0 +1,69 @@
+pragma solidity ^0.4.0;
+//pragma experimental ABIEncoderV2; // for the getter function using multiple arrays
+
+contract debug3 {
+    
+    uint numEmpDetails=1;
+    
+    struct EmpDetail {
+        uint employeeID;    //system generated
+        string empName;
+        string emailID;
+        uint emp_c;
+        address allowEmployees;
+    }
+    
+    EmpDetail[] EmpDetails;
+    
+    mapping(uint => EmpDetail) Employees;
+    //mapping(address => EmpDetail) EmployeeAddress;
+    event AddedEmployee(uint employeeID, string empName, address thisAddress);
+    //event AddressOfZero(address[] hr_address);
+    
+    /*modifier onlyHR {
+        require(
+            msg.sender == address(0),
+            "Only HR can call this function."
+        );
+        _;
+    }*/
+    
+    //function to create employees
+    function createEmployee() public {
+        Employees[numEmpDetails+1].emp_c = numEmpDetails+1;
+        EmpDetails.push(Employees[numEmpDetails+1]);
+    }
+    
+        //function to add employees details
+    function addEmpDetails(string name, string emailID) public {
+        //empID is the return variable
+        uint employeeID = numEmpDetails++;
+        EmpDetail storage empl = Employees[employeeID];
+        
+        empl.empName = name;
+        empl.emailID = emailID;
+        
+        
+        EmpDetails.push(Employees[employeeID]);
+        //Employees[numEmpDetails+1].empName.push(name);
+        //Employees[numEmpDetails+1].emailID.push(emailID);
+        //Employees[numEmpDetails+1].allowEmployees.push(address(this));
+        
+        //Trigger the event
+        emit AddedEmployee(employeeID, name, address(this));
+    }
+    
+    /*function addressOfZero() view external returns (address) {
+        emit AddressOfZero(Employees[1].allowEmployees);
+    }*/
+    
+    // returns employee information pragma experimantal style
+    /*function getEmployee(uint employeeID) view external returns (uint[], string[], address[]) {
+        return (Employees[employeeID].employeeID,Employees[employeeID].empName, Employees[employeeID].allowEmployees);
+    }*/
+    
+    //returns unique employee details
+    function getEmployee(uint EmployeeID) view external returns (uint, string, address) {
+        return (Employees[EmployeeID].employeeID, Employees[EmployeeID].empName, Employees[EmployeeID].allowEmployees);
+    }
+}
