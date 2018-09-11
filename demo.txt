@@ -1,54 +1,63 @@
-//demo.sol
 pragma solidity ^0.4.0;
+//pragma experimental ABIEncoderV2; // for the getter function using multiple arrays
 
-contract Employee {
-
-    //HR to add Employee Details
-    struct EmpDetails {
-        string empName;
-        string emailID;
+contract debug2 {
+    
+    uint numEmpDetails=1;
+    
+    struct EmpDetail {
+        uint[] employeeID;    //system generated
+        string[] empName;
+        string[] emailID;
+        uint emp_c;
+        address[] allowEmployees;
     }
-
-    //Employee to add their own ID
-    struct Emp_govID {
-        uint emp_gov_ID;
-        string empName;
-        bool doesExist;
+    
+    EmpDetail[] EmpDetails;
+    
+    mapping(uint => EmpDetail) Employees;
+    event AddedEmployee(uint employeeID, string empName, address thisAddress);
+    //event AddressOfZero(address[] hr_address);
+    
+    /*modifier onlyHR {
+        require(
+            msg.sender == address(0),
+            "Only HR can call this function."
+        );
+        _;
+    }*/
+    
+    //function to create employees
+    function createEmployee() public {
+        Employees[numEmpDetails+1].emp_c = numEmpDetails+1;
+        EmpDetails.push(Employees[numEmpDetails+1]);
     }
-    //Event to add employee
-    event AddedEmployee(uint employeeID);
     
-    //counters to keep count. Ideally both should be same
-    uint numEmpDetails;
-    uint numEmp_govID;
-    
-    //mappings to generate structures
-    mapping(uint => EmpDetails) Employees;
-    mapping(uint => Emp_govID) govID;
-    
-    //function to add employees
-    function addEmployee(string name, string emailID) public {
+        //function to add employees details
+    function addEmpDetails(string name, string emailID) public {
         //empID is the return variable
         uint employeeID = numEmpDetails++;
-        //Create a new Employee Struct with name and empID and saves it to storage
-        Employees[employeeID] = EmpDetails(name,emailID);
+        
+        Employees[employeeID].employeeID.push(numEmpDetails+1);
+        Employees[numEmpDetails+1].empName.push(name);
+        Employees[numEmpDetails+1].emailID.push(emailID);
+        Employees[numEmpDetails+1].allowEmployees.push(address(this));
+        
         //Trigger the event
-        emit AddedEmployee(employeeID);
+        emit AddedEmployee(employeeID, name, address(this));
     }
     
-    //function to add Emp Gov ID 
-    function add_govID(string  empName, uint employeeID) public {
-        if(govID[employeeID].doesExist == true) {
-            uint empGov_ID = numEmp_govID++; //empGOV_ID is the return variable
-            govID[empGov_ID] = Emp_govID(employeeID, empName, true);
-        }
+    /*function addressOfZero() view external returns (address) {
+        emit AddressOfZero(Employees[1].allowEmployees);
+    }*/
+    
+    // returns employee information pragma experimantal style
+    /*function getEmployee(uint employeeID) view external returns (uint[], string[], address[]) {
+        return (Employees[employeeID].employeeID,Employees[employeeID].empName, Employees[employeeID].allowEmployees);
+    }*/
+    
+    //returns unique employee details
+    function getEmployee(uint EmployeeID) view external returns (uint, string, address) {
+        return (Employees[EmployeeID].employeeID[EmployeeID], Employees[EmployeeID].empName[EmployeeID], Employees[EmployeeID].allowEmployees[EmployeeID]);
     }
-    
-    /********* GET using view ***********/
-    
-    // returns employee information
-    function getEmployee(uint employeeID) public view returns (uint, string) {
-        return (govID[employeeID].emp_gov_ID, govID[employeeID].empName);
-    }
-    
 }
