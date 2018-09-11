@@ -1,0 +1,57 @@
+Step 1: Building the demo-evm
+		docker build -t demo-evm .
+		Dockerfile:-
+			FROM ubuntu:16.04
+
+			LABEL version="1.0"
+			LABEL maintainer="anirudh16b@gmail.com"
+
+			ENV DEBIAN_FRONTEND=noninteractive
+
+			RUN apt-get update && apt-get install --yes software-properties-common
+			RUN add-apt-repository ppa:ethereum/ethereum
+			RUN apt-get update && apt-get install --yes geth
+
+			RUN adduser --disabled-login --gecos "" eth_user
+
+			USER eth_user
+			WORKDIR /home/eth_user
+
+			ENTRYPOINT bash
+			
+Step 2a: Create directory /d/Docker/eth			
+Step 2b: Creating the genesis.json using vi (within the docker, not the geth bash) and the correct pwd = /d/Docker/eth
+		{
+    "nonce": "0x0000000000000042",
+    "timestamp": "0x00",
+    "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "extraData": "0x00",
+    "gasLimit": "0x8000000",
+    "difficulty": "0x400",
+    "mixhash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "coinbase": "0x3333333333333333333333333333333333333333",
+    "config": {
+               "chainId": 15, 
+               "homesteadBlock": 0,
+               "eip155Block": 0,
+               "eip158Block": 0
+     },
+    "alloc": {
+    }
+}
+		
+Step 3: - Run the docker demo-evm for the first time on port 8599
+		 $docker run --rm -it -p 8599:8599 demo-evm 
+		- From another docker window check if it is running:
+		  $docker ps -as
+		  ---note the name (determined_ride)
+			CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                    NAMES               SIZE
+			428e7a204890        demo-evm            "/bin/sh -c bash"   20 minutes ago      Up 20 minutes       0.0.0.0:8599->8599/tcp   determined_ride     0B (virtual 291MB)
+Step 4: Execute the IMAGE
+		$ docker exec -it determined_ride /bin/bash
+Step 5: Initailize genesis block (from the Docker console, not the geth console within docker) )
+		geth --datadir /d/Docker/eth/block1 init /d/Docker/eth/genesis.json
+Step 6: Connect the rpc port:
+		 $geth --datadir /d/Docker/eth/block1 --rpc --rpcport "8545" --ipcdisable console
+		
+		  
