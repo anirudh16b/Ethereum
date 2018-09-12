@@ -1,5 +1,5 @@
 pragma solidity ^0.4.0;
-//pragma experimental ABIEncoderV2; // for the getter function using multiple arrays
+pragma experimental ABIEncoderV2; // for the getter function using multiple arrays
 
 contract debug2 {
     
@@ -8,15 +8,18 @@ contract debug2 {
     struct EmpDetail {
         uint employeeID;    //system generated
         string empName;
-        string emailID;
+        bytes16 emailID;
         uint emp_c;
-        address allowEmployees;
+        address empAddr;
     }
     
-    EmpDetail[] EmpDetails;
-    
     mapping(uint => EmpDetail) Employees;
-    //mapping(address => EmpDetail) EmployeeAddress;
+    
+    EmpDetail[] EmpDetails;
+    uint[] public EmpIDs;
+    string[] public EmpNames;
+    address[] public EmpAddrs;
+    
     event AddedEmployee(uint employeeID, string empName, address thisAddress);
     //event AddressOfZero(address[] hr_address);
     
@@ -34,28 +37,24 @@ contract debug2 {
         EmpDetails.push(Employees[numEmpDetails+1]);
     }
     
-        //function to add employees details
-    function addEmpDetails(string name, string emailID) public {
-        //empID is the return variable
+    //function to add employees details
+    function addEmpDetails(string name, bytes16 emailID) public {
         uint employeeID = numEmpDetails++;
         EmpDetail storage empl = Employees[employeeID];
         
         empl.empName = name;
         empl.emailID = emailID;
-        empl.allowEmployees = address(this);
+        empl.empAddr = address(this);
         
         EmpDetails.push(Employees[employeeID]) -1;
-        //Employees[numEmpDetails+1].empName.push(name);
-        //Employees[numEmpDetails+1].emailID.push(emailID);
-        //Employees[numEmpDetails+1].allowEmployees.push(address(this));
+        EmpIDs.push(employeeID) -1;
+        EmpNames.push(name) -1;
+        EmpAddrs.push(address(this));
+        
         
         //Trigger the event
         emit AddedEmployee(employeeID, name, address(this));
     }
-    
-    /*function addressOfZero() view external returns (address) {
-        emit AddressOfZero(Employees[1].allowEmployees);
-    }*/
     
     // returns employee information pragma experimantal style
     /*function getEmployee(uint employeeID) view external returns (uint[], string[], address[]) {
@@ -64,6 +63,11 @@ contract debug2 {
     
     //returns unique employee details
     function getEmployee(uint EmployeeID) view external returns (uint, string, address) {
-        return (Employees[EmployeeID].employeeID, Employees[EmployeeID].empName, Employees[EmployeeID].allowEmployees);
+        return (Employees[EmployeeID].employeeID, Employees[EmployeeID].empName, Employees[EmployeeID].empAddr);
+    }
+    
+    //returns all Employees
+    function getEmployees() view public returns (uint[], string[], address[]){
+            return (EmpIDs, EmpNames, EmpAddrs)  ;
     }
 }
