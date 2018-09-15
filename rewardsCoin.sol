@@ -30,7 +30,7 @@ contract RewardsCoin {
     
     //totalSupply of tokens Function 1
     //function totalSupply() public constant returns (uint);
-    function totalSupply() public constant returns (uint) {
+    function totalSupply() public pure returns (uint) {
         return _totalSupply;
     }
     
@@ -68,7 +68,11 @@ contract RewardsCoin {
         emit Transfer(from, to, tokens);
         return true;
     }
-
+    
+    function retrieveTokens(address _token) view public returns (uint tokens){
+       return balances[_token];
+  }
+  
     // Allow `spender` to withdraw from your account, multiple times, up to the `tokens` amount.
     // If this function is called again it overwrites the current allowance with _value.
 
