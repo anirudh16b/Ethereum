@@ -1,36 +1,38 @@
 pragma solidity ^0.4.0;
 pragma experimental ABIEncoderV2; // for the getter function using multiple arrays
 
+//returns the owner of the contract
 contract Owned {
     address owner;
-    
-    function owned() public payable {
+    constructor() public payable {
         owner = msg.sender;
-    }
-        
-    modifier isOwner {
-        require(msg.sender == owner);
-        _;
     }
 }
 
+/*
+//generates the passcode in bytes32
 contract genPasscode {
-    function setPasscode(uint employeeID) pure public returns (bytes10) {//doesn't read/modify state variable
-        bytes10 passcode = bytes10(keccak256(abi.encodePacked(employeeID)));
+    bytes32 passcode;
+    constructor(uint employeeID) public payable{
+    passcode  = bytes32(keccak256(abi.encodePacked(employeeID)));
+    }
+    
+   function setPasscode(uint employeeID) pure public returns (bytes32) {
+        bytes32 passcode = bytes32(keccak256(abi.encodePacked(employeeID)));
         return passcode;
     }
-} 
+} */
 
-contract Main {
-
+//the main contract to create the employees
+contract Main is Owned {
+    
     uint numEmpDetails=1;
-   
-    struct EmpDetail  {
+    
+    struct EmpDetail {
         uint employeeID;    //system generated
         string empName;
         bytes16 emailID;
-        bytes10 passcode;
-        string govID;
+        bytes32 passcode;
         uint emp_c;
         address empAddr;
     }
@@ -38,37 +40,42 @@ contract Main {
     mapping(uint => EmpDetail) Employees;
     
     EmpDetail[] EmpDetails;
-    uint[] public EmpIDs;
-    string[] public EmpNames;
-    address[] public EmpAddrs;
+    uint public EmpIDs;
+    string public EmpNames;
+    address public EmpAddrs;
     
-    event AddedEmployee(uint employeeID, string empName, address thisAddress, bytes10 passcode);
+    event AddedEmployee(uint employeeID, string empName, address thisAddress, bytes32 passcode);
+    //event AddressOfZero(address[] hr_address);
+    
+    modifier validEmp(bytes32 passcode, uint employeeID) {
+        require(
+            passcode == Employees[employeeID].passcode,
+            "Invalid Passcode."
+        );
+        _;
+    }
     
     //function to create employees
-    function createEmployee() external {
+    function createEmployee() public {
         Employees[numEmpDetails+1].emp_c = numEmpDetails+1;
         EmpDetails.push(Employees[numEmpDetails+1]);
     }
     
     //function to add employees details
-    function addEmpDetails(string name, bytes16 emailID) external {
+    function addEmpDetails(string name, bytes16 emailID) public payable {
         uint employeeID = numEmpDetails++;
-        Owned l_owner;
-        l_owner = new Owned();
-        genPasscode gpc;
-        gpc = new genPasscode();
-        bytes10 passcode =  gpc.setPasscode(employeeID);
+        bytes32 passcode;
+        passcode  = bytes32(keccak256(abi.encodePacked(employeeID)));
         EmpDetail storage empl = Employees[employeeID];
         
         empl.empName = name;
         empl.emailID = emailID;
         empl.empAddr = address(this);
-        empl.passcode = passcode;
         
         EmpDetails.push(Employees[employeeID]) -1;
-        EmpIDs.push(employeeID) -1;
-        EmpNames.push(name) -1;
-        EmpAddrs.push(address(this));
+        //EmpIDs.push(employeeID) -1;
+        //EmpNames.push(name) -1;
+        //EmpAddrs.push(address(this));
         
         
         //Trigger the event
@@ -80,35 +87,13 @@ contract Main {
         return (Employees[employeeID].employeeID,Employees[employeeID].empName, Employees[employeeID].allowEmployees);
     }*/
     
-}
-
-contract getDetails is Owned, Main {
-        //returns unique employee details
-    function getEmployee(uint EmployeeID) isOwner() view external returns (uint, string, address, bytes10) {
-        return (Employees[EmployeeID].employeeID, Employees[EmployeeID].empName, Employees[EmployeeID].empAddr, Employees[EmployeeID].passcode);
+    //returns unique employee details
+    function getEmployee(uint EmployeeID) view external returns (uint, string, address) {
+        return (Employees[EmployeeID].employeeID, Employees[EmployeeID].empName, Employees[EmployeeID].empAddr);
     }
     
     //returns all Employees
-    function getEmployees() view public returns (uint[], string[], address[]){
+    function getEmployees() view public returns (uint, string, address){
             return (EmpIDs, EmpNames, EmpAddrs)  ;
     }
-}
-
-contract AddEmpPrivateDetails is Main {
-    
-    modifier validEmp(bytes10 passcode, uint employeeID) {
-        require(
-            passcode == Employees[employeeID].passcode,
-            "Invalid Passcode."
-        );
-        _;
-    }
-    
-    Main main = new Main();
-    
-    function verifyAddEmp(bytes10 passcode, uint employeeID, string govID) validEmp(passcode, employeeID) public {
-            Employees[employeeID].govID = govID;
-        }
-            
-    
 }
