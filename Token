@@ -1,1 +1,70 @@
+pragma solidity ^0.4.0;
 
+contract IncentiveToken {
+    string  public name = "Incentive Token";//Name of the token
+    string  public symbol = "INCT"; //Symbol used for the token
+    string  public standard = "Incentive Token v1.0";
+    uint256 public totalSupply; // Stores the total supply of tokens in existence
+    address sender;
+    event Transfer(
+        address indexed _from,
+        address indexed _to,
+        uint256 _value
+    );
+
+    event Approval(
+        address indexed _owner,
+        address indexed _spender,
+        uint256 _value
+    );
+
+    //Solidity mapping to store the balance of each account that owns tokens
+    mapping(address => uint256) public balanceOf;
+
+    //Solidity mapping to store mapping between addresses that are allowed to transfer token
+    // Add mapping in between the address for transferFrom to work
+    mapping(address => mapping(address => uint256)) public allowance;
+
+    //Constructor used to store the initial level of token
+    function supplyToken (uint256 _initialSupply,address add) public payable {
+        sender=add;
+        balanceOf[sender] += _initialSupply;
+        totalSupply += _initialSupply;
+    }
+
+    //Function to allow owner of token to send tokens to another account.
+    function transfer(address sender,address _to, uint256 _value) public payable returns (bool success) {
+        require(balanceOf[sender] >= _value);
+        balanceOf[sender] -= _value;
+        balanceOf[_to] += _value;
+        emit Transfer(sender, _to, _value);
+
+        return true;
+    }
+
+    // Allow the _spender to spend token of the _value
+    // Approve an account for it to transfer token
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        allowance[sender][_spender] = _value;
+
+        Approval(sender, _spender, _value);
+
+        return true;
+    }
+
+    //Function to allow a user to transfer token to another address
+    //First approve the account to transfer and then add the mapping between from and to addresses
+    function transferFrom(address _from, address _to, uint256 _value) public payable returns (bool success) {
+        require(_value <= balanceOf[_from]);
+        require(_value <= allowance[_from][sender]);
+
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+
+        allowance[_from][sender] -= _value;
+
+        Transfer(_from, _to, _value);
+
+        return true;
+    }
+}
