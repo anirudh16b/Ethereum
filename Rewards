@@ -1,0 +1,17 @@
+pragma solidity ^0.4.0;
+//pragma experimental ABIEncoderV2;
+//import "./Owned.sol";
+import "./IncentiveToken.sol";
+
+//the main contract to create the project member
+contract Incent  {
+
+    IncentiveToken token;
+    constructor (address tokenContractAddress) public payable {
+        token =  IncentiveToken(tokenContractAddress);
+    }
+    
+     function assingBalance(address sender){
+        token.supplyToken(1000,sender);
+    }
+  }
